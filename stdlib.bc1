@@ -1,0 +1,11 @@
+function print(string){
+    i; i = 0;
+    char;
+    loop:
+        char = *(string+i);
+        cout(char);
+        i = i + 2;
+    if(char){; goto loop;};
+
+    return 0;
+};

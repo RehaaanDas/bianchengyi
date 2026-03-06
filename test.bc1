@@ -1,0 +1,15 @@
+goto main;
+import ./stdlib.bc1
+main:
+
+hello;
+hello = "你好世界\0";
+
+print(hello);
+cout(33);
+
+cout(20320);
+
+inp;
+inp = cin();
+cout(inp);
