@@ -1,0 +1,17 @@
+//dgsgdgdf
+DR_A_LO = 1;
+loop:
+if((DR_DONE - 1)){
+    goto loop;
+};
+cout(DR_DATA);
+
+DW_DATA = 56;
+DW_A_LO = 4;
+DW_E = 1;
+check:
+if((DW_DONE - 1)){
+    goto check;
+};
+cout(121);
+exit();
