@@ -4,8 +4,7 @@ str2 = "hello\0";
 
 result = sdiff(str1, str2);
 if(result){
-    //print(("different strings\0"));
-    cout(121);
+    print(("different strings\0"));
 };
 exit();
 import ./stdlib.bc1

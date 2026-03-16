@@ -11,18 +11,14 @@ function print(string){
 };
 function sdiff(one, two){   
     i; i =0;
+    difc;
     onechar; twochar;
     comp:
         onechar = *(one+i);
         twochar = *(two+i);
-        cout(onechar);
-        cout(twochar);
-        cout((0+3));
-        cout((onechar));
-        cout(10);
-
+        difc = difc + onechar - twochar;
         i = i + 2;
     if(onechar){;goto comp;}
 
-    return diff;
+    return difc;
 };
