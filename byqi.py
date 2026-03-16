@@ -9,6 +9,7 @@ def insertSubArray(mainArray, index, subArray):
 def findClosingCodeblock(program, startLine):
     count = 1
     for lineIndex, line in enumerate(program[startLine+1:]):
+        line = line.strip()
         if(re.fullmatch(r'.*\{', line)): count += 1
         if(re.fullmatch(r'\}', line)): count -= 1
         if(count == 0): return (startLine+lineIndex+1)
@@ -37,7 +38,7 @@ for index, arg in enumerate(sys.argv):
         del sys.argv[index]
 
 with open(sys.argv[1], "r", encoding="utf-8") as file:
-    program = re.split(r'[\n;]', file.read())
+    program = re.split(r'[;\n]', file.read())
 
 #imports
 for index, line in enumerate(program):
@@ -99,6 +100,18 @@ for index, line in enumerate(program):
         codepointCounter += 1
 
         if(tCounter > tvarsCounter): tvarsCounter = tCounter
+#bracket expansion
+for index, line in enumerate(program):
+    start = re.search(r'[\s\*\&\(\!]\(', program[index])
+    while(start):
+        end = findClosingBracket(program[index], start.end())+1
+        simplified = program[index].replace(program[index][start.end()-1:end+1], "t0000")
+        program.insert(index+1, simplified)
+
+        program[index] = f"t0000 = {program[index][start.end():end]}"
+
+        if(1 > tvarsCounter): tvarsCounter = 1
+        start = re.search(r'[\s\*\&\(\!]\(', program[index])
 #arithmetic expansion
 for index, line in enumerate(program): 
     if(re.search(r'[a-zA-Z\s0-9]=[a-zA-Z\s0-9]', line)):
@@ -114,9 +127,10 @@ for index, line in enumerate(program):
                     break
 #string expansion
 for index, line in enumerate(program):
-    if(re.search(r'.*\s*\=\s*[\'\"].*[\'\"]', line)):
-        destName = line.split("=")[0]
-        program[index] = f'{destName} = {str([*ast.literal_eval(line.split("=")[1])])}'
+    if(re.search(r'.*\s*\=\s*[\'\"].*[\'\"]', line.strip())):
+        destName = line.split("=", 1)[0].strip()
+        value = line.split("=", 1)[1].strip()
+        program[index] = f'{destName} = {str([*ast.literal_eval(value)])}'
 
 #char conversion
 for index, line in enumerate(program):
@@ -125,6 +139,7 @@ for index, line in enumerate(program):
         line = line.replace(line[char.start():char.end()], str(ord(ast.literal_eval(line[char.start():char.end()]))))
 
     program[index] = line
+
 #array expansion
 for index, line in enumerate(program):
     if(re.search(r'.*\s*\=\s*\[.*\]', line)):
@@ -136,20 +151,6 @@ for index, line in enumerate(program):
         program[index] = f"{destName} = &e{codepointCounter:04} + 2"
 
         codepointCounter += 1
-#bracket expansion
-for index, line in enumerate(program):
-    start = re.search(r'[\s\*\&\(\!]\(', program[index])
-    while(start):
-        #for l in program:
-        #    print(l)
-        end = findClosingBracket(program[index], start.end())+1
-        simplified = program[index].replace(program[index][start.end()-1:end+1], "t0000")
-        program.insert(index+1, simplified)
-
-        program[index] = f"t0000 = {program[index][start.end():end]}"
-
-        if(1 > tvarsCounter): tvarsCounter = 1
-        start = re.search(r'[\s\*\&\(\!]\(', program[index])
 #tvar init lines
 for i in range(0, tvarsCounter+1):
     program.insert(0, f"t{i:04}")
@@ -158,7 +159,7 @@ for index, line in enumerate(program):
     if(re.fullmatch(r'[^e\{\}\~][a-zA-Z0-9]*', line.strip()) and not line.strip() == "NOP"):
         program.append(f"e{codepointCounter:04}")
         for checkindex, check in enumerate(program):
-            while(re.search(r'[\s\=\-\+\(\)\*\&\!]' + line.replace(" ", "") + r'[\s\=\-\+\(\)]', program[checkindex]) or re.fullmatch(r'.*[\s\=\-\+\)\*\&\!]' + line.replace(" ", ""), program[checkindex]) or re.fullmatch(r'.*\s' + line.replace(" ", ""), program[checkindex])) or re.fullmatch(line.replace(" ", "") + r'\s*[\=].*', program[checkindex]):
+            while(re.search(r'[\s\=\-\+\(\)\*\&\!\,]' + line.replace(" ", "") + r'[\s\=\-\+\(\)\,\;]', program[checkindex]) or re.fullmatch(r'.*[\s\=\-\+\)\*\&\!\,]' + line.replace(" ", ""), program[checkindex]) or re.fullmatch(r'.*\s' + line.replace(" ", ""), program[checkindex])) or re.fullmatch(line.replace(" ", "") + r'\s*[\=].*', program[checkindex]):
                 program[checkindex] = check.replace(line.replace(" ", ""), f"e{codepointCounter:04}")
         
         codepointCounter += 1
@@ -347,7 +348,7 @@ if not simplifyOnly:
 
     program = ["REG R14 1", f"REG R4 e{codepointCounter:04}"] + program + [f"e{codepointCounter:04}"]
 
-program = [line+"\n" for line in program if line]
+program = [line+"\n" for line in program if line.strip()]
 
 #codepoint assignment
 for index, line in enumerate(program):
@@ -361,6 +362,7 @@ for index, line in enumerate(program):
         program[index] = line+"\n"
     if line[0] == "~":
         program[index] = line[1:]
+
 
 with open(sys.argv[2], "w") as file:
     file.writelines(program)

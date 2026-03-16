@@ -9,3 +9,20 @@ function print(string){
 
     return 0;
 };
+function sdiff(one, two){   
+    i; i =0;
+    onechar; twochar;
+    comp:
+        onechar = *(one+i);
+        twochar = *(two+i);
+        cout(onechar);
+        cout(twochar);
+        cout((0+3));
+        cout((onechar));
+        cout(10);
+
+        i = i + 2;
+    if(onechar){;goto comp;}
+
+    return diff;
+};
