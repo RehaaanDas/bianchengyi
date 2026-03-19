@@ -1,7 +1,3 @@
-goto main;
-import ./stdlib.bc1
-main:
-
 hello;
 hello = "你好世界\0";
 
@@ -11,5 +7,9 @@ cout(33);
 cout(20320);
 
 inp;
+loop1:
 inp = cin();
 cout(inp);
+goto loop1;
+exit();
+import ./stdlib.bc1

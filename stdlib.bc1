@@ -1,11 +1,11 @@
 function print(string){
     i; i = 0;
     char;
-    loop:
+    stdlibloop:
         char = *(string+i);
         cout(char);
         i = i + 2;
-    if(char){; goto loop;};
+    if(char){; goto stdlibloop;};
 
     return 0;
 };
@@ -13,12 +13,12 @@ function sdiff(one, two){
     i; i =0;
     difc;
     onechar; twochar;
-    comp:
+    stdlibloop0:
         onechar = *(one+i);
         twochar = *(two+i);
         difc = difc + onechar - twochar;
         i = i + 2;
-    if(onechar){;goto comp;}
+    if(onechar){;goto stdlibloop0;}
 
     return difc;
 };

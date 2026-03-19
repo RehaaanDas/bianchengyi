@@ -19,6 +19,13 @@ def findClosingBracket(line, startIndex):
         if(char == "("): count += 1
         if(char == ")"): count -= 1
         if(count == 0): return index+startIndex
+def nameReplace(string, substring, replacewith):
+    search = re.search(r'(?<![A-Za-z0-9\_])' + substring + r'(?![A-Za-z0-9\_])', string)
+    while search:
+        string = string[:search.start()] + replacewith + string[search.end():]
+        search = re.search(r'(?<![A-Za-z0-9\_])' + substring + r'(?![A-Za-z0-9\_])', string)
+
+    return string
 
 program = []
 
@@ -71,7 +78,7 @@ for index, line in enumerate(program):
     if(re.fullmatch(r'.+\:', line.replace(" ", ""))):
         program[index] = f"e{codepointCounter:04}"
         for checkindex, check in enumerate(program):
-            program[checkindex] = check.replace(f" {line.replace(" ", "")[:-1]}", f" e{codepointCounter:04}")
+            program[checkindex] = nameReplace(program[checkindex], line.replace(" ", "")[:-1], f"e{codepointCounter:04}")
         codepointCounter += 1
 #functions   
 for index, line in enumerate(program):    
@@ -89,14 +96,14 @@ for index, line in enumerate(program):
         for argIndex, arg in enumerate(arguments):
             program.insert(index+1, f"t{tCounter:04} = *(sp - {len(arguments)-argIndex})")
             for functionLineIndex, functionLine in enumerate(program[index:closeBracket]):
-                program[index+functionLineIndex] = program[index+functionLineIndex].replace(arg, f"t{tCounter:04}")
+                program[index+functionLineIndex] = nameReplace(program[index+functionLineIndex], arg, f"t{tCounter:04}")
             tCounter += 1
     
         functionName = re.split(r'[\s(]', line)[1]
 
         for checkindex, check in enumerate(program):
-            program[checkindex] = program[checkindex].replace(functionName, f"e{codepointCounter:04}")
-
+            program[checkindex] = nameReplace(program[checkindex], functionName, f"e{codepointCounter:04}")
+            
         codepointCounter += 1
 
         if(tCounter > tvarsCounter): tvarsCounter = tCounter
@@ -160,7 +167,7 @@ for index, line in enumerate(program):
         program.append(f"e{codepointCounter:04}")
         for checkindex, check in enumerate(program):
             while(re.search(r'[\s\=\-\+\(\)\*\&\!\,]' + line.replace(" ", "") + r'[\s\=\-\+\(\)\,\;]', program[checkindex]) or re.fullmatch(r'.*[\s\=\-\+\)\*\&\!\,]' + line.replace(" ", ""), program[checkindex]) or re.fullmatch(r'.*\s' + line.replace(" ", ""), program[checkindex])) or re.fullmatch(line.replace(" ", "") + r'\s*[\=].*', program[checkindex]):
-                program[checkindex] = check.replace(line.replace(" ", ""), f"e{codepointCounter:04}")
+                program[checkindex] = nameReplace(program[checkindex], line.replace(" ", ""), f"e{codepointCounter:04}")
         
         codepointCounter += 1
         program[index] = ""
@@ -238,10 +245,14 @@ if not simplifyOnly:
                 checkInstructions = [f"LDI R6 {splitLine[1]}",
                                     "ADD R6 R6 R6",
                                     f"JZI {splitLine[2]}"]
-                
-            #to the absolutely nobody who is going to read this,
-            #there used to be !negation functionality...
-
+            else:
+                checkInstructions = [f"LDI R6 {splitLine[1][1:]}",
+                                    "ADD R6 R6 R6",
+                                    f"JZI e{codepointCounter:04}",
+                                    f"JUCI {splitLine[2]}",
+                                    f"e{codepointCounter:04}"]
+                codepointCounter += 1
+            
             program = insertSubArray(program, index, checkInstructions)
         #e0001(e0003, e0004)
         if(re.fullmatch(r'e[0-9][0-9][0-9][0-9]\(.*\)', line.replace(" ", ""))):
